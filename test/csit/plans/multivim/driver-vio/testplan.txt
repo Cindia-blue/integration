@@ -2,3 +2,4 @@
 ## Place the suites in run order.
 
 multivim/driver-vio/driver_vio_tenant.robot
+multivim/driver-vio/driver_vio_image.robot
