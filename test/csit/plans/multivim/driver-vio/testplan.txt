@@ -3,3 +3,4 @@
 
 multivim/driver-vio/driver_vio_tenant.robot
 multivim/driver-vio/driver_vio_image.robot
+multivim/driver-vio/driver_vio_server.robot
