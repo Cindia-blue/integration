@@ -122,6 +122,7 @@ Delete server boot from image
     [Documentation]   Delete server boot from image
     ${resp}=  Delete Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/servers/${server_image_id}   # Server delete
     Should Be Equal As Integers   ${resp.status_code}   ${delete_status}
+    Sleep  20s  # Wait for task complete
     ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/servers/${server_image_id}
     Should Be Equal As Integers   ${resp.status_code}   ${invalid_status}
 
@@ -169,6 +170,7 @@ Delete server boot from volume
     [Documentation]   Delete server boot from volume
     ${resp}=  Delete Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/servers/${server_volume_id}  # Server delete
     Should Be Equal As Integers   ${resp.status_code}   ${delete_status}
+    Sleep  20s  # Wait for task complete
     ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/servers/${server_volume_id}
     Should Be Equal As Integers   ${resp.status_code}   ${invalid_status}
 
