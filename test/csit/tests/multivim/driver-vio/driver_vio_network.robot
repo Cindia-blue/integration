@@ -44,7 +44,7 @@ Get vio vim
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${tenant_id}    ${response_json['tenants'][0]['id']}
 
-    ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/images
+    ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/images?name=${image_name}
     Should Be Equal As Integers   ${resp.status_code}   ${success_status}
     ${response_json}    json.loads    ${resp.content}
     ${respDataLength}    Get Length    ${response_json['images']}
