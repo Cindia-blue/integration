@@ -78,6 +78,7 @@ Image create test
     Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
 
     ${response_json}    json.loads    ${resp.content}
+    Should Be Equal As Integers   ${response_json['returnCode']}   1
     Should Be Equal As Strings    ${response_json['tenantId']}   ${tenant_id}
     Should Be Equal As Strings    ${response_json['vimId']}    ${vim_id}
     Should Be Equal As Strings    ${response_json['name']}   ${new_image_name}
@@ -93,6 +94,25 @@ Image create test
     ${response_json}    json.loads    ${resp.content}
     Should Be Equal As Strings    ${response_json['status']}   ${image_status}
     Should Be Equal As Strings    ${response_json['name']}   ${new_image_name}
+
+    ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/images?name=${new_image_name}
+    Should Be Equal As Integers   ${resp.status_code}   ${success_status}
+
+    ${response_json}    json.loads    ${resp.content}
+    ${respDataLength}    Get Length    ${response_json['images']}
+    Should Be True    ${respDataLength} ＝= 1
+
+Duplicate Image create test
+    [Documentation]   Duplicate Image create test
+    ${body}    Create Dictionary    imagePath=${new_image_path}    visibility=${image_visibility}    name=${new_image_name}
+    ...    imageType=${image_type}   containerFormat=${image_container}
+
+    ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/images    ${body}
+    Should Be Equal As Integers   ${resp.status_code}   ${success_status}
+
+    ${response_json}    json.loads    ${resp.content}
+    Should Be Equal As Integers   ${response_json['returnCode']}   0
+    Should Be Equal As Strings    ${response_json['id']}   ${new_image_id}
 
     ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/images?name=${new_image_name}
     Should Be Equal As Integers   ${resp.status_code}   ${success_status}
