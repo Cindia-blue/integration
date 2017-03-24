@@ -100,7 +100,7 @@ Image create test
 
     ${response_json}    json.loads    ${resp.content}
     ${respDataLength}    Get Length    ${response_json['images']}
-    Should Be True    ${respDataLength} ＝= 1
+    Should Be Equal As Integers    ${respDataLength}   1
 
 Duplicate Image create test
     [Documentation]   Duplicate Image create test
@@ -119,7 +119,7 @@ Duplicate Image create test
 
     ${response_json}    json.loads    ${resp.content}
     ${respDataLength}    Get Length    ${response_json['images']}
-    Should Be True    ${respDataLength} ＝= 1
+    Should Be Equal As Integers    ${respDataLength}   1
 
 Image delete test
     [Documentation]   Image delete test
