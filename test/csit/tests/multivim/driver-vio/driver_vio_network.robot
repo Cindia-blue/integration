@@ -51,22 +51,24 @@ Get vio vim
     Should Be True    ${respDataLength} >= 1
     Set Suite Variable    ${image_id}    ${response_json['images'][0]['id']}
 
-Flat Network Create
-    [Documentation]   Create flat network
+VLAN Network Create
+    [Documentation]   Create vlan network
     ${body}    Create Dictionary    name=${net_name}    shared=true    routerExternal=false
-    ...    networkType=flat   vlanTransparent=false
+    ...    networkType=vlan   vlanTransparent=false    segmentationId=200
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks    ${body}
     Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
     ${response_json}    json.loads    ${resp.content}
     Should Be Equal As Integers   ${response_json['returnCode']}   1
     Set Suite Variable    ${net_id}    ${response_json['id']}
+    Set Suite Variable    ${phy_net}    ${response_json['physicalNetwork']}
 
     ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks/${net_id}
     Should Be Equal As Integers   ${resp.status_code}   ${success_status}
     ${response_json}    json.loads    ${resp.content}
+    Should Be Equal As Integers   ${response_json['segmentationId']}   200
     Should Be Equal As Strings   ${response_json['status']}   ${status}
     Should Be Equal As Strings   ${response_json['name']}   ${net_name}
-    Should Be Equal As Strings   ${response_json['networkType']}   flat
+    Should Be Equal As Strings   ${response_json['networkType']}   vlan
     Should Be True    ${response_json['shared']}
     Should Not Be True   ${response_json['routerExternal']}
 
@@ -110,3 +112,26 @@ Clean up network, subnet and port
 
     ${resp}=  Delete Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks/${net_id}
     Should Be Equal As Integers   ${resp.status_code}   ${delete_status}
+
+Multi-Type Network Create and delete
+    [Documentation]   Create flat, vxlan network
+    @{ITEMS}    Create List    flat    vxlan
+    :FOR   ${ITEM}   IN   @{ITEMS}
+    \    Log   Create ${ITEM} network
+    \    ${body}    Create Dictionary    name=${ITEM}    shared=false    routerExternal=true
+    \    ...    networkType=${ITEM}   vlanTransparent=false    physicalNetwork=${phy_net}
+    \    ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks    ${body}
+    \    Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
+    \    ${response_json}    json.loads    ${resp.content}
+    \    Should Be Equal As Integers   ${response_json['returnCode']}   1
+    \    Set Suite Variable    ${net_id}    ${response_json['id']}
+    \    ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks/${net_id}
+    \    Should Be Equal As Integers   ${resp.status_code}   ${success_status}
+    \    ${response_json}    json.loads    ${resp.content}
+    \    Should Be Equal As Strings   ${response_json['status']}   ${status}
+    \    Should Be Equal As Strings   ${response_json['name']}   ${ITEM}
+    \    Should Be Equal As Strings   ${response_json['networkType']}   ${ITEM}
+    \    Should Not Be True    ${response_json['shared']}
+    \    Should Be True   ${response_json['routerExternal']}
+    \    ${resp}=  Delete Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks/${net_id}
+    \    Should Be Equal As Integers   ${resp.status_code}   ${delete_status}
