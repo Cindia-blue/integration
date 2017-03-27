@@ -31,6 +31,7 @@ ${port_name_2}   server-port-2
 ${vol_name}   server-vol
 ${vol_size}   5
 ${vol_status}   available
+${attach_status}   attached
 
 ${flavor_name}   server-flavor
 ${flavor_vcpu}   2
@@ -39,6 +40,7 @@ ${flavor_disk}   5
 ${flavor_index}   100
 
 ${server_name_image}   vio-image-server
+${image_vol}   image-vol
 ${server_name_vol}   vio-vol-server
 ${server_status}   ACTIVE
 
@@ -103,6 +105,20 @@ Flavor create
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${flavor_id}    ${response_json['id']}
 
+Volume create for server
+    [Documentation]   Create volume for image
+    ${body}    Create Dictionary    name=${image_vol}    volumeSize=${vol_size}    imageId=${image_id}
+    ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/volumes    ${body}
+    Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
+    ${response_json}    json.loads    ${resp.content}
+    Set Suite Variable    ${image_vol_id}    ${response_json['id']}
+
+    Sleep  90s    # Waiting for volume create done
+    ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/volumes/${image_vol_id}
+    Should Be Equal As Integers   ${resp.status_code}   ${success_status}
+    ${response_json}    json.loads    ${resp.content}
+    Should Be Equal As Strings   ${response_json['status']}  ${vol_status}
+
 Create server boot from image
     Should Be Equal As Strings  ${PREV TEST STATUS}     PASS    Not create server if flavor create failed
     [Documentation]   Create server boot from image
@@ -110,7 +126,11 @@ Create server boot from image
     ${portid}    Create Dictionary    portId=${port_id_1}
     ${nic_array}    Create List   ${portid}
 
-    ${body}    Create Dictionary    name=${server_name_image}    boot=${boot}    flavorId=${flavor_id}    nicArray=${nic_array}
+    ${volumeid}   Create Dictionary  volumeId=${image_vol_id}
+    ${vol_array}   Create List  ${volumeid}
+
+    ${body}    Create Dictionary    name=${server_name_image}    boot=${boot}    flavorId=${flavor_id}
+    ...   nicArray=${nic_array}   volumeArray=${vol_array}
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/servers    ${body}
     Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
     ${response_json}    json.loads    ${resp.content}
@@ -122,6 +142,11 @@ Create server boot from image
     Should Be Equal As Integers   ${resp.status_code}   ${success_status}
     ${response_json}    json.loads    ${resp.content}
     Should Be Equal As Strings   ${response_json['status']}   ${server_status}
+
+    ${resp}=  Get Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/volumes/${image_vol_id}
+    Should Be Equal As Integers   ${resp.status_code}   ${success_status}
+    ${response_json}    json.loads    ${resp.content}
+    Should Be Equal As Strings   ${response_json['status']}  ${attach_status}
 
 List server boot from image
     Should Be Equal As Strings  ${PREV TEST STATUS}     PASS    Not list server if create server failed
@@ -229,4 +254,7 @@ Clean up network, subnet and port
 Clean up volume
     [Documentation]   Clean up volume
     ${resp}=  Delete Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/volumes/${vol_id}
+    Should Be Equal As Integers   ${resp.status_code}   ${delete_status}
+
+    ${resp}=  Delete Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/volumes/${image_vol_id}
     Should Be Equal As Integers   ${resp.status_code}   ${delete_status}
