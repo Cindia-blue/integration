@@ -31,7 +31,7 @@ ${port_name_2}   server-port-2
 ${vol_name}   server-vol
 ${vol_size}   5
 ${vol_status}   available
-${attach_status}   attached
+${attach_status}   in-use
 
 ${flavor_name}   server-flavor
 ${flavor_vcpu}   2
