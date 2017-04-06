@@ -11,8 +11,9 @@ Library     HttpLibrary.HTTP
 ${extsys_path}   /openoapi/extsys/v1
 ${multivim_path}   /openoapi/multivim-vio/v1
 
-${accept_status}   202
 ${success_status}   200
+${created_status}   201
+${accept_status}   202
 ${delete_status}   204
 ${invalid_status}   404
 
@@ -72,26 +73,26 @@ Network create
     ${body}    Create Dictionary    name=${net_name}    shared=true    routerExternal=false
     ...    networkType=flat   vlanTransparent=false
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/networks    ${body}
-    Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
+    Should Be Equal As Integers   ${resp.status_code}   ${created_status}
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${net_id}    ${response_json['id']}
 
     ${body}    Create Dictionary    name=${subnet_name}    networkId=${net_id}    ipVersion=4
     ...    enableDhcp=false   cidr=${subnet_cidr}
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/subnets    ${body}
-    Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
+    Should Be Equal As Integers   ${resp.status_code}   ${created_status}
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${subnet_id}    ${response_json['id']}
 
     ${body}    Create Dictionary    name=${port_name_1}    networkId=${net_id}    subnetId=${subnet_id}
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/ports    ${body}
-    Should Be Equal As Integers   ${resp.status_code}    ${accept_status}
+    Should Be Equal As Integers   ${resp.status_code}    ${created_status}
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${port_id_1}    ${response_json['id']}
 
     ${body}    Create Dictionary    name=${port_name_2}    networkId=${net_id}    subnetId=${subnet_id}
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/ports    ${body}
-    Should Be Equal As Integers   ${resp.status_code}    ${accept_status}
+    Should Be Equal As Integers   ${resp.status_code}    ${created_status}
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${port_id_2}    ${response_json['id']}
 
@@ -101,7 +102,7 @@ Flavor create
     ${body}    Create Dictionary    name=${flavor_name}    vcpu=${flavor_vcpu}    memory=${flavor_memory}
     ...    isPublic=True    disk=${flavor_disk}    id=${flavor_index}
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/flavors    ${body}
-    Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
+    Should Be Equal As Integers   ${resp.status_code}   ${success_status}
     ${response_json}    json.loads    ${resp.content}
     Set Suite Variable    ${flavor_id}    ${response_json['id']}
 
