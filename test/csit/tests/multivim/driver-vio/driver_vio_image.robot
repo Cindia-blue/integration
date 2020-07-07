@@ -11,8 +11,8 @@ Library     HttpLibrary.HTTP
 ${extsys_path}   /openoapi/extsys/v1
 ${multivim_path}   /openoapi/multivim-vio/v1
 
-${accept_status}   202
 ${success_status}   200
+${created_status}   201
 ${delete_status}   204
 ${invalid_status}   404
 
@@ -75,7 +75,7 @@ Image create test
     ...    imageType=${image_type}   containerFormat=${image_container}
 
     ${resp}=  Post Request    msb_session    ${multivim_path}/${vim_id}/${tenant_id}/images    ${body}
-    Should Be Equal As Integers   ${resp.status_code}   ${accept_status}
+    Should Be Equal As Integers   ${resp.status_code}   ${created_status}
 
     ${response_json}    json.loads    ${resp.content}
     Should Be Equal As Integers   ${response_json['returnCode']}   1
